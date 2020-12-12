@@ -78,6 +78,15 @@ class CPU:
         elif op == MUL:
             self.registers[reg_a] *= self.registers[reg_b]
             self.pc += 3
+        
+        elif op == CMP:
+            if self.registers[reg_a] == self.registers[reg_b]:
+                self.fl = self.fl
+            elif self.registers[reg_a] > self.registers[reg_b]:
+                self.fl = self.fl
+            elif self.registers[reg_a] < self.registers[reg_b]:
+                self.fl = self.fl
+
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -149,6 +158,18 @@ class CPU:
         elif instruction == RET:
             self.pc = self.sp
             self.sp += 1
+
+        elif instruction == CMP:
+            pass
+
+        elif instruction == JMP:
+            pass
+
+        elif instruction == JEQ:
+            pass
+
+        elif instruction == JNE:
+            pass
 
         else:
             print("invalid instruction")
