@@ -27,7 +27,7 @@ class CPU:
         self.ram = [0] * 256
         self.halted = False
         self.sp = self.registers[7]
-        self.fl = 0
+        self.equal = 0
 
     def ram_read(self, address):
         return self.ram[address]
@@ -78,14 +78,14 @@ class CPU:
         elif op == MUL:
             self.registers[reg_a] *= self.registers[reg_b]
             self.pc += 3
-        
+
         elif op == CMP:
             if self.registers[reg_a] == self.registers[reg_b]:
-                self.fl = self.fl
+                self.equal = self.equal | 1
             elif self.registers[reg_a] > self.registers[reg_b]:
-                self.fl = self.fl
+                self.equal = self.equal | 0
             elif self.registers[reg_a] < self.registers[reg_b]:
-                self.fl = self.fl
+                self.equal = self.equal | 0
 
         else:
             raise Exception("Unsupported ALU operation")
@@ -98,7 +98,7 @@ class CPU:
 
         print(f"TRACE: %02X | %02X %02X %02X |" % (
             self.pc,
-            # self.fl,
+            # self.equal,
             # self.ie,
             self.ram_read(self.pc),
             self.ram_read(self.pc + 1),
@@ -160,16 +160,29 @@ class CPU:
             self.sp += 1
 
         elif instruction == CMP:
-            pass
+            self.alu(CMP, operand_a, operand_b)
+            self.pc += 3
 
         elif instruction == JMP:
-            pass
+            self.sp -= 1
+            self.ram[self.sp] = self.pc + 2
+            self.pc = self.registers[operand_a]
 
         elif instruction == JEQ:
-            pass
+            if self.equal == 1:
+                self.sp -= 1
+                self.ram[self.sp] = self.pc + 2
+                self.pc = self.registers[operand_a]
+            else:
+                self.pc += 2
 
         elif instruction == JNE:
-            pass
+            if self.equal == 0:
+                self.sp -= 1
+                self.ram[self.sp] = self.pc + 2
+                self.pc = self.registers[operand_a]
+            else:
+                self.pc += 2
 
         else:
             print("invalid instruction")
