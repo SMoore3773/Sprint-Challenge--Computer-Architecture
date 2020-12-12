@@ -81,11 +81,11 @@ class CPU:
 
         elif op == CMP:
             if self.registers[reg_a] == self.registers[reg_b]:
-                self.equal = self.equal | 1
+                self.equal = 1
             elif self.registers[reg_a] > self.registers[reg_b]:
-                self.equal = self.equal | 0
+                self.equal = 0
             elif self.registers[reg_a] < self.registers[reg_b]:
-                self.equal = self.equal | 0
+                self.equal = 0
 
         else:
             raise Exception("Unsupported ALU operation")
@@ -160,27 +160,36 @@ class CPU:
             self.sp += 1
 
         elif instruction == CMP:
+            # used alu to hold comparison logic
             self.alu(CMP, operand_a, operand_b)
+            # increment program counter 3 because of inst and 2 operands
             self.pc += 3
 
         elif instruction == JMP:
+            # decrement stack pointer
             self.sp -= 1
-            self.ram[self.sp] = self.pc + 2
+            # writes the value of operand b to the stack pointer register
+            self.ram_write(operand_b, self.sp)
+            # sets the program counter to the value of the register at operand a
             self.pc = self.registers[operand_a]
 
         elif instruction == JEQ:
+            # checks equal flag and if equal, jumps
             if self.equal == 1:
                 self.sp -= 1
-                self.ram[self.sp] = self.pc + 2
+                self.ram_write(operand_b, self.sp)
                 self.pc = self.registers[operand_a]
+            # if not equal, increments the program counter to the next instruction because the 2 next values are not needed
             else:
                 self.pc += 2
 
         elif instruction == JNE:
+            # checks the equal flag and if not equal, jumps
             if self.equal == 0:
                 self.sp -= 1
-                self.ram[self.sp] = self.pc + 2
+                self.ram[self.sp] = operand_b
                 self.pc = self.registers[operand_a]
+            # if equal, increments program counter because the next 2 values are not needed
             else:
                 self.pc += 2
 
